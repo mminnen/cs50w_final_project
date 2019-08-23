@@ -19,8 +19,8 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("manage_controllers", views.manage_controllers, name="manage_controllers"),
-    path("add_controller", views.add_controller, name="add_controller"),
+    path("manage_controllers/", views.manage_controllers, name="manage_controllers"),
+    path("collect_statistics/", views.collect_statistics, name="collect_statistics"),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls'), name='accounts'),
     path('accounts/register/', views.register, name='register')

@@ -16,7 +16,11 @@
           {%  if user.is_authenticated %}
         <p class="lead">Welcome to the Cisco DNA-C app</p>
         <p class="lead">You can view the health of your network or search trough logged events.</p>
-          {%  endif %}
+            <form class="form" action="{% url 'collect_statistics' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-info">Start collecting health statistics</button>
+            </form>
+           {%  endif %}
       </div>
     </div>
   </div>

@@ -1,0 +1,39 @@
+{%  extends "DNAC/base.html" %}
+
+{% block title %}
+        <title>CS50w - Final Project</title>
+{% endblock title %}
+
+
+  {% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5">Cisco DNAC Controllers:</h1>
+          {%  if not user.is_authenticated %}
+        <p class="lead">Please login to see the menu!</p>
+          {%  endif %}
+          {%  if user.is_authenticated %}
+        <p class="lead">Welcome to the Cisco DNA-C app</p>
+              {% if controllers %}
+                  <ul>>
+                  {% for controller in controllers %}
+                  <li>{{ controller.name }}, url = {{ controller.url }}</li>
+                  {% endfor %}
+                  {% endif %}
+        <p class="lead"><< FORM >>.</p>
+        <h2>Add Controllers</h2>
+        <form method="post" id="AddControllerForm">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <button type="submit">Add</button>
+        <a href="{% url 'manage_controllers' %}">Cancel</a>
+        </form>
+          {%  endif %}
+      </div>
+    </div>
+  </div>
+  {% endblock content %}
+

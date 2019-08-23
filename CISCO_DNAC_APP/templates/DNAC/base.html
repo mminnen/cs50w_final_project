@@ -1,0 +1,82 @@
+{% load static %}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="{% static 'DNAC//js/bootstrap.bundle.min.js' %}"></script>
+
+    {% block title %}
+    {% endblock title %}
+
+  <!-- Bootstrap core CSS -->
+  <link href="{% static 'DNAC/css/bootstrap.min.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">Cisco DNA-C tool{% if user.is_authenticated %}- Hi {{ user.username }}.{% endif %}</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">Home
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+            {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="">Menu</a>
+          </li>
+          <li class="nav-item">
+           <a class="nav-link" href="}">Order</a>
+          </li>
+          <li class="nav-item">
+           <a class="nav-link" href="">Order Status</a>
+          </li>
+             {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{%  url 'manage_controllers' %}">Manage Controllers</a>
+                 </li>
+             {%  endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{%  url 'logout' %}?next=/">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{%  url 'login' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+        {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href={%  url 'admin:index' %}>Admin</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  {% block content %}
+  {% endblock content %}
+
+</body>
+
+</html>

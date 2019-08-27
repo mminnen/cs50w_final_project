@@ -1,10 +1,15 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from CISCO_DNAC_APP.models import *
 from CISCO_DNAC_APP.forms import *
 import time, threading, requests, json
 from requests.auth import HTTPBasicAuth
+import urllib3
+
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def index(request):
@@ -45,6 +50,7 @@ def collect_statistics(request):
         request_controller_stats()
     else:
         pass
+    messages.add_message(request, messages.SUCCESS, 'Data collection has been started...')
     return render(request, "DNAC/index.html")
 
 
@@ -53,24 +59,66 @@ def request_controller_stats():
     controllers = DnacControllers.objects.all()
     for controller in controllers:
         print(controller.name)
-        token = generate_auth_token(controller.url, controller.username, controller.password)
-        headers = {"content-type": "application/json", "X-Auth-Token": token}
-        ## Make a generic get function for this!
-        # Get DNA Center information
-        # https://developer.cisco.com/site/dna-center-rest-api/
-        url = controller.url.rstrip('/')+"/dna/intent/api/v1/network-health"
-        print("\nExecuting GET '%s'\n" % url)
-        resp = requests.get(url, headers=headers, verify=False)
-        response_json = resp.json()
-        print(json.dumps(response_json, indent=4), '\n')
-        result = json.dumps(response_json, indent=4)
-    # authenticate
-    # get data
-    # save to models
-    # send some result of starting the collection via a flash message
+
+        # network_device_list(controller=controller)  # Get list of devices
+
+        get_network_health(controller=controller)  # Get health of networks
+
+        # get_site_count(controller=controller)  # Get Site count
+
     print(time.ctime())
     threading.Timer(60, request_controller_stats).start()  # Collect information with a 60 second interval
     return
+
+
+def network_device_list(controller):
+    """
+    Get a list of network devices
+    """
+    url = controller.url.rstrip('/')+"/api/v1/network-device"
+    get_intent_api(url, controller)
+    return
+
+
+def get_network_health(controller):
+    """
+    Returns Overall Network Health information by Device category (Access, Distribution, Core, Router, Wireless)
+    for any given point of time.
+    """
+    url = controller.url.rstrip('/')+"/dna/intent/api/v1/network-health"
+    get_intent_api(url, controller)
+    return
+
+
+def get_site_count(controller):
+    """
+    API to get site count
+    https://developer.cisco.com/site/dna-center-rest-api/
+    """
+    url = controller.url.rstrip('/')+"/dna/intent/api/v1/site/count"
+    get_intent_api(url, controller)
+    return
+
+
+def get_intent_api(url, controller):
+    """
+    Generic fuction to GET information via the Intent API
+    """
+    print("\nExecuting GET '%s'\n" % url)
+    token = generate_auth_token(controller.url, controller.username, controller.password)
+    headers = {
+        # 'content-type': "application/json",
+        '__runsync': "true",
+        #'__timeout': "30",
+        #'__persistbapioutput': "true",
+        'X-Auth-Token': token}
+    params = "timestamp="+str(int((time.time()) * 1000))
+    resp = requests.get(url, headers=headers, params=params, verify=False)
+    print(resp.status_code)
+    response_json = resp.json()
+    print(json.dumps(response_json, indent=4), '\n')
+    result = json.dumps(response_json, indent=4)
+    return result
 
 
 def generate_auth_token(url, username, password):
@@ -82,10 +130,10 @@ def generate_auth_token(url, username, password):
     try:
         r = requests.post(post_url, auth=HTTPBasicAuth(username=username, password=password), headers=headers, verify=False)
         # Remove '#' if need to print out response
-        print (r.text)
+        token = r.json()["Token"]  # Extract token from json response {"Token":"...."}
         r.raise_for_status()
         # return service token
-        return r.json()["Token"]
+        return token
     except requests.exceptions.ConnectionError as e:
         # Something wrong, cannot get service token
         print ("Error: %s" % e)

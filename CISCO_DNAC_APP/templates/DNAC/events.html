@@ -1,0 +1,35 @@
+{%  extends "DNAC/base.html" %}
+
+{% block title %}
+        <title>CS50w - Final Project</title>
+{% endblock title %}
+
+
+  {% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5">Events and notifications.</h1>
+          {%  if not user.is_authenticated %}
+        <p class="lead">Please login first!</p>
+          {%  endif %}
+          {%  if user.is_authenticated %}
+        <p class="lead">List the events of a controller</p>
+                 <div class="dropdown">
+                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                Select a DNAC Controller
+              </button>
+              {% if controllers %}
+                  <div class="dropdown-menu">
+                  {% for controller in controllers %}
+                  <a class="dropdown-item" href="{% url 'controller_health' %}+'/'{{controller.id  }}">{{ controller.url }}</a>
+                  {% endfor %}
+                  </div>
+               {% endif %}
+            </div>
+           {%  endif %}
+      </div>
+    </div>
+  </div>
+  {% endblock content %}
+

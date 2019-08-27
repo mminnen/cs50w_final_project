@@ -13,7 +13,24 @@
   <meta name="author" content="">
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="{% static 'DNAC//js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'DNAC/js/bootstrap.bundle.min.js' %}"></script>
+    {%  if controller_health  %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        // Need to declare variables used in javascript as global variables
+        // https://stackoverflow.com/questions/36689075/how-to-use-django-variable-in-javascript-file
+        var access_health = {{ controller_health.access }};
+        var distribution_health = {{ controller_health.distribution }};
+        var core_health = {{ controller_health.core }};
+        var wlc_health = {{ controller_health.wlc }};
+        var ap_health = {{ controller_health.ap }};
+    </script>
+    <script type="text/javascript" src="{% static 'DNAC/js/gauges.js' %}"></script>
+    {%  endif %}
+
+    {% block head %}
+    {% endblock head %}
+
 
     {% block title %}
     {% endblock title %}
@@ -41,10 +58,10 @@
           </li>
             {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="">Health</a>
+            <a class="nav-link" href="{%  url 'health' %}">Health</a>
           </li>
           <li class="nav-item">
-           <a class="nav-link" href="}">Events</a>
+           <a class="nav-link" href="{% url 'events' %}">Events</a>
           </li>
           <li class="nav-item">
            <a class="nav-link" href="">To be defined</a>

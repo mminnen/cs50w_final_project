@@ -1,0 +1,85 @@
+{%  extends "DNAC/base.html" %}
+
+{% block head %}
+<meta http-equiv="Refresh" content="60">
+{%  endblock head %}
+
+{% block title %}
+        <title>CS50w - Final Project</title>
+{% endblock title %}
+
+
+  {% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5">Health information.</h1>
+          {%  if not user.is_authenticated %}
+        <p class="lead">Please login first!</p>
+          {%  endif %}
+          {%  if user.is_authenticated %}
+        <p class="lead">Show the health status of a Controller.</p>
+              <div class="dropdown">
+                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                Select a DNAC Controller
+              </button>
+              {% if controllers %}
+                  <div class="dropdown-menu">
+                  {% for controller in controllers %}
+                  <a class="dropdown-item" href="{% url 'controller_health' controller.id %}">{{ controller.url }}</a>
+                  {% endfor %}
+                  </div>
+               {% endif %}
+            </div>
+           {%  endif %}
+
+    {% if controller_health %}
+      <div class="row">
+      <div class="col-lg-12 text-center">
+          <h4 class="mt-5">The overall health score for {{ controller.name }} is: <b>{{ controller_health.overall }}</b></h4>
+      </div>
+      </div>
+      <div class="row">
+      <div class="col-lg-12 text-center">
+        <br>
+        <p> The health per category:</p>
+        <div id="gauges" style="width: 600px; height: 120px; align-items: center; margin: 0 auto;
+        justify-content: space-around; display: flex;"></div>
+         <br>
+      </div>
+      </div>
+    {% endif %}
+      </div>
+    </div>
+  {%  if controller_count %}
+      <div class="row">
+      <div class="col-lg-12 text-center">
+      <table class="table" style="align-items: center; margin: 0 auto;
+        justify-content: space-around; display: flex;">
+      <thead class="thead-dark">
+      <tr>
+          <th>Category</th>
+          <th>Total</th>
+          <th>Good</th>
+          <th>Fair</th>
+          <th>Bad</th>
+          <th>Unmonitored</th>
+       </tr>
+
+        {% for key, value in controller_count.items %}
+        <tr>
+        <td> {{ key }}</td>
+        {% for key2, value2 in value.items %}
+          <td> {{ value2 }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+
+    </table>
+    </div>
+    </div>
+
+  {% endif %}
+  </div>
+  {% endblock content %}
+

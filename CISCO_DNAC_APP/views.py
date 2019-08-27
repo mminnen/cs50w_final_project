@@ -16,6 +16,16 @@ def index(request):
     return render(request, "DNAC/index.html")
 
 
+def health(request):
+    controllers = DnacControllers.objects.all().order_by('name')
+    return render(request, "DNAC/health.html", {'controllers': controllers})
+
+
+def events(request):
+    # Make this one searchable
+    return render(request, "DNAC/events.html")
+
+
 def manage_controllers(request):
     if request.method == 'POST':
         form = AddControllerForm(request.POST)
@@ -28,6 +38,31 @@ def manage_controllers(request):
     form = AddControllerForm()
     controllers = DnacControllers.objects.all().order_by('name')
     return render(request, "DNAC/manage_controllers.html", {'controllers': controllers, 'form': form})
+
+
+def controller_health(request, controller_id):
+    controllers = DnacControllers.objects.all().order_by('name')
+    controller = DnacControllers.objects.get(pk=controller_id)
+
+    health = json.loads(get_network_health(controller=controller))
+
+    controller_health = {'overall': 0, 'access': 0, 'distribution': 0, 'core': 0, 'wlc': 0, 'ap': 0}
+    controller_count = {}
+
+    if 'error' in health:
+        print(health['error'])
+    else:
+        for item in health['response']:
+            controller_health.update({'overall': item['healthScore']})
+        for item in health['healthDistirubution']:  # Yes, Cisco really has a typo like this in their API :-(
+            print(item)
+            controller_health.update({item['category'].lower(): item['healthScore']})
+        for item in health['healthDistirubution']:
+            controller_count.update({item['category']: {'total': item['totalCount'], 'good': item['goodCount'], 'fair': item['fairCount'], 'bad': item['badCount'], 'unmonitored': item['unmonCount'] }})
+        print(controller_count)
+
+    return render(request, "DNAC/health.html", {'controllers': controllers, 'controller': controller,
+                                                'controller_health': controller_health, 'controller_count': controller_count})
 
 
 def register(request):
@@ -86,8 +121,8 @@ def get_network_health(controller):
     for any given point of time.
     """
     url = controller.url.rstrip('/')+"/dna/intent/api/v1/network-health"
-    get_intent_api(url, controller)
-    return
+    result = get_intent_api(url, controller)
+    return result
 
 
 def get_site_count(controller):
@@ -138,3 +173,12 @@ def generate_auth_token(url, username, password):
         # Something wrong, cannot get service token
         print ("Error: %s" % e)
         sys.exit ()
+
+
+def listen_web_hooks(request):
+    if request.method == 'POST':
+        print(request.POST)
+        # save event to models
+    else:
+        pass
+    return

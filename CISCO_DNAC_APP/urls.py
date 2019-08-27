@@ -19,8 +19,12 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("manage_controllers/", views.manage_controllers, name="manage_controllers"),
     path("collect_statistics/", views.collect_statistics, name="collect_statistics"),
+    path("manage_controllers/", views.manage_controllers, name="manage_controllers"),
+    path("health/", views.health, name="health"),
+    path("controller_health/<int:controller_id>", views.controller_health, name="controller_health"),
+    path("events/", views.events, name="events"),
+    path("listen_web_hooks/", views.listen_web_hooks, name="listen_web_hooks"),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls'), name='accounts'),
     path('accounts/register/', views.register, name='register')

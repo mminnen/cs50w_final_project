@@ -12,6 +12,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+
+
 def index(request):
     return render(request, "DNAC/index.html")
 
@@ -51,6 +53,7 @@ def controller_health(request, controller_id):
 
     if 'error' in health:
         print(health['error'])
+        messages.add_message(request, messages.ERROR, 'An error ocurred: '+health['error'])
     else:
         for item in health['response']:
             controller_health.update({'overall': item['healthScore']})

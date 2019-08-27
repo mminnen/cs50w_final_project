@@ -13,12 +13,11 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center">
-        <h1 class="mt-5">Health information.</h1>
+        <h1 class="mt-5">Live health dashboard.</h1>
           {%  if not user.is_authenticated %}
         <p class="lead">Please login first!</p>
           {%  endif %}
           {%  if user.is_authenticated %}
-        <p class="lead">Show the health status of a Controller.</p>
               <div class="dropdown">
                  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 Select a DNAC Controller
@@ -42,7 +41,7 @@
       <div class="row">
       <div class="col-lg-12 text-center">
         <br>
-        <p> The health per category:</p>
+        <p> The health distribution per category:</p>
         <div id="gauges" style="width: 600px; height: 120px; align-items: center; margin: 0 auto;
         justify-content: space-around; display: flex;"></div>
          <br>

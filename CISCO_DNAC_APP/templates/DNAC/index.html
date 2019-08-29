@@ -18,7 +18,7 @@
         <p class="lead">You can view the health of your network or search trough logged events.</p>
             <form class="form" action="{% url 'collect_statistics' %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-info">Start collecting health statistics</button>
+            <button type="submit" class="btn btn-info">Simulate webhook events</button>
             </form>
            {%  endif %}
       </div>

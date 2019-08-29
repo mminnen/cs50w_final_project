@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
 from . import views
 
 urlpatterns = [
@@ -24,7 +25,8 @@ urlpatterns = [
     path("health/", views.health, name="health"),
     path("controller_health/<int:controller_id>", views.controller_health, name="controller_health"),
     path("events/", views.events, name="events"),
-    path("listen_web_hooks/", views.listen_web_hooks, name="listen_web_hooks"),
+    # Allow access without a CSRF token (csrf_exempt)
+    path("listen_web_hooks/", csrf_exempt(views.listen_web_hooks), name="listen_web_hooks"),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls'), name='accounts'),
     path('accounts/register/', views.register, name='register')

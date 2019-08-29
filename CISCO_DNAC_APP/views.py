@@ -2,16 +2,18 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from CISCO_DNAC_APP.models import *
 from CISCO_DNAC_APP.forms import *
+from CISCO_DNAC_APP.simulate_webhook_events import simulate_event
 import time, threading, requests, json
 from requests.auth import HTTPBasicAuth
 import urllib3
 
 
+from datetime import datetime
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
 
 
 def index(request):
@@ -67,7 +69,6 @@ def controller_health(request, controller_id):
     return render(request, "DNAC/health.html", {'controllers': controllers, 'controller': controller,
                                                 'controller_health': controller_health, 'controller_count': controller_count})
 
-
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -88,24 +89,14 @@ def collect_statistics(request):
         request_controller_stats()
     else:
         pass
-    messages.add_message(request, messages.SUCCESS, 'Data collection has been started...')
+    messages.add_message(request, messages.SUCCESS, 'Simulating webhook events...')
     return render(request, "DNAC/index.html")
 
 
 def request_controller_stats():
-    # Get controller list
-    controllers = DnacControllers.objects.all()
-    for controller in controllers:
-        print(controller.name)
-
-        # network_device_list(controller=controller)  # Get list of devices
-
-        get_network_health(controller=controller)  # Get health of networks
-
-        # get_site_count(controller=controller)  # Get Site count
-
+    simulate_event()
     print(time.ctime())
-    threading.Timer(60, request_controller_stats).start()  # Collect information with a 60 second interval
+    threading.Timer(10, request_controller_stats).start()  # Restart function every 10 second interval
     return
 
 
@@ -124,7 +115,8 @@ def get_network_health(controller):
     for any given point of time.
     """
     url = controller.url.rstrip('/')+"/dna/intent/api/v1/network-health"
-    result = get_intent_api(url, controller)
+    params = "timestamp=" + str(int((time.time()) * 1000))
+    result = get_intent_api(url, controller, params)
     return result
 
 
@@ -138,19 +130,20 @@ def get_site_count(controller):
     return
 
 
-def get_intent_api(url, controller):
+def get_intent_api(url, controller, params=None):
     """
     Generic fuction to GET information via the Intent API
     """
+    print(params)
     print("\nExecuting GET '%s'\n" % url)
     token = generate_auth_token(controller.url, controller.username, controller.password)
     headers = {
-        # 'content-type': "application/json",
+        'content-type': "application/json",
         '__runsync': "true",
-        #'__timeout': "30",
-        #'__persistbapioutput': "true",
-        'X-Auth-Token': token}
-    params = "timestamp="+str(int((time.time()) * 1000))
+        '__timeout': "30",
+        '__persistbapioutput': "true",
+        'X-Auth-Token': token
+    }
     resp = requests.get(url, headers=headers, params=params, verify=False)
     print(resp.status_code)
     response_json = resp.json()
@@ -179,9 +172,47 @@ def generate_auth_token(url, username, password):
 
 
 def listen_web_hooks(request):
+    # Currently this function does not require authentication
     if request.method == 'POST':
-        print(request.POST)
+        # print(dir(request))
+        # print(request.user)
+        # print(request.META)
+        # print(request.headers)
+        print(request.META['REMOTE_ADDR'])
+        print(request.body)
         # save event to models
+        """
+        instance_id <== instanceId
+        source_ip <== request.META['REMOTE_ADDR']
+        title <== title
+        category <== Category
+        domain <== domain
+        severity <== severity
+        timestamp <== timestamp (integer)
+        actual_service_id <== actualServiceId
+        issue_description <== ["enrichmentInfo"]["issueDetails"]["issue"][0]["issueSummary"]
+        """
+        try:
+            post = json.loads(request.body)
+            print(post["enrichmentInfo"]["issueDetails"]["issue"][0]["issueSummary"])
+
+            event = WebhookEvents()
+            event.instance_id = post["instanceId"]
+            event.source_ip = request.META['REMOTE_ADDR']
+            event.title = post["title"]
+            event.category = post["category"]
+            event.domain = post["domain"]
+            event.severity = post["severity"]
+            # https: // stackoverflow.com / questions / 31548132 / python - datetime - fromtimestamp - yielding - valueerror - year - out - of - range
+            # Need to divide the provided timestamp by 1000 to convert ms to seconds
+            event.timestamp = datetime.fromtimestamp(post["timestamp"]/1000)
+            event.actual_service_id = post["actualServiceId"]
+            event.issue_description = post["enrichmentInfo"]["issueDetails"]["issue"][0]["issueSummary"]
+
+            event.save()
+        except Exception as e:
+            print(e)
+            return HttpResponse("ERROR", status=500)
     else:
-        pass
-    return
+        HttpResponse("Method not allowed", status=403)
+    return HttpResponse("OK")

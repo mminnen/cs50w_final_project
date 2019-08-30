@@ -212,7 +212,7 @@ def listen_web_hooks(request):
             event.severity = post["severity"]
             # https: // stackoverflow.com / questions / 31548132 / python - datetime - fromtimestamp - yielding - valueerror - year - out - of - range
             # Need to divide the provided timestamp by 1000 to convert ms to seconds
-            event.timestamp = datetime.fromtimestamp(post["timestamp"]/1000)
+            event.Date = datetime.fromtimestamp(post["timestamp"]/1000)
             event.actual_service_id = post["actualServiceId"]
             event.issue_description = post["enrichmentInfo"]["issueDetails"]["issue"][0]["issueSummary"]
 

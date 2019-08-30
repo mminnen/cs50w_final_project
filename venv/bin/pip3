@@ -1,5 +1,4 @@
 #!/home/mminnen/CS50/Final_project/venv/bin/python
-
 # -*- coding: utf-8 -*-
 import re
 import sys

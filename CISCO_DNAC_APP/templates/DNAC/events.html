@@ -4,6 +4,7 @@
         <title>CS50w - Final Project</title>
 {% endblock title %}
 
+{% load widget_tweaks %}
 
   {% block content %}
   <div class="container">
@@ -14,20 +15,114 @@
         <p class="lead">Please login first!</p>
           {%  endif %}
           {%  if user.is_authenticated %}
-        <p class="lead">List the events of a controller</p>
-                 <div class="dropdown">
-                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                Select a DNAC Controller
-              </button>
-              {% if controllers %}
-                  <div class="dropdown-menu">
-                  {% for controller in controllers %}
-                  <a class="dropdown-item" href="{% url 'controller_health' %}+'/'{{controller.id  }}">{{ controller.url }}</a>
-                  {% endfor %}
+              <!--
+            <form method="get">
+                {{ filter.form.as_p }}
+                <button type="submit">Search</button>
+            </form>
+            <ul>
+            {% for event in filter.qs %}
+                <li>{{ event.source_ip }} - {{ event.title }}</li>
+            {% endfor %}
+                </ul>
+              -->
+              <form method="get">
+            <div class="card card-body bg-light">
+              <h4 style="margin-top: 0">Filter</h4>
+              <div class="row">
+                <div class="form-group col-sm-3 col-md-4">
+                  {{ filter.form.source_ip.label_tag }}
+                  {% render_field filter.form.source_ip class="form-control" %}
+                </div>
+                <div class="form-group col-sm-3 col-md-4">
+                  {{ filter.form.title.label_tag }}
+                  {% render_field filter.form.title class="form-control" %}
+                </div>
+                <div class="form-group col-sm-3 col-md-4">
+                  {{ filter.form.category.label_tag }}
+                  {% render_field filter.form.category class="form-control" %}
+                </div>
+                <div class="form-group col-sm-3 col-md-4">
+                  {{ filter.form.issue_description.label_tag }}
+                  {% render_field filter.form.issue_description class="form-control" %}
+                </div>
+                <div class="form-group col-sm-3 col-md-4">
+                  {{ filter.form.severity.label_tag }}
+                  <div>
+                    {% for choice in filter.form.severity %}
+                      <label class="checkbox-inline">
+                        {{ choice.tag }} {{ choice.choice_label }}
+                      </label>
+                    {% endfor %}
                   </div>
-               {% endif %}
+                </div>
+              </div>
+                <div class="row">
+                     <div class="form-group col-sm-3 col-md-4">
+                      {{ filter.form.day__gte.label_tag }}
+                      {% render_field filter.form.day__gte class="form-control" %}
+                    </div>
+                     <div class="form-group col-sm-3 col-md-4">
+                      {{ filter.form.month__gte.label_tag }}
+                      {% render_field filter.form.month__gte class="form-control" %}
+                    </div>
+                        <div class="form-group col-sm-3 col-md-4">
+                      {{ filter.form.year__gte.label_tag }}
+                      {% render_field filter.form.year__gte class="form-control" %}
+                    </div>
+                </div>
+                <div class="row">
+                     <div class="form-group col-sm-3 col-md-4">
+                      {{ filter.form.day__lte.label_tag }}
+                      {% render_field filter.form.day__lte class="form-control" %}
+                    </div>
+                     <div class="form-group col-sm-3 col-md-4">
+                      {{ filter.form.month__lte.label_tag }}
+                      {% render_field filter.form.month__lte class="form-control" %}
+                    </div>
+                        <div class="form-group col-sm-3 col-md-4">
+                      {{ filter.form.year__lte.label_tag }}
+                      {% render_field filter.form.year__lte class="form-control" %}
+                    </div>
+                </div>
+              <button type="submit" class="btn btn-primary">
+                <span class="glyphicon glyphicon-search"></span> Search
+              </button>
             </div>
-           {%  endif %}
+           </form>
+
+          <table class="table table-bordered">
+            <thead class="thead-dark">
+              <tr>
+                <th>Source IP</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Timestamp</th>
+                <th>Severity</th>
+                <th>Issue description</th>
+                <th>Event Id</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in filter.qs %}
+                <tr>
+                  <td>{{ event.source_ip }}</td>
+                  <td>{{ event.title }}</td>
+                  <td>{{ event.category }}</td>
+                  <td>{{ event.Date }}</td>
+                  <td>{{ event.severity }}</td>
+                   <td>{{ event.issue_description }}</td>
+                   <td>{{ event.instance_id }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">No data</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {%  endif %}
       </div>
     </div>
   </div>

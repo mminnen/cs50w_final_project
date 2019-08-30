@@ -16,7 +16,13 @@ word4 = ("without a reason.", "five times.", "again.", "on request of the user."
 category = ("CRITICAL", "WARN", "INFO", "MAJOR", "MINOR")
 num = random.randrange(0, 5)
 
+
 def simulate_event():
+  """
+  https://developer.cisco.com/docs/dna-center/#!getting-started-with-webhooks-on-the-cisco-dna-center-platform/event-schema-and-sample-response
+  Note that example on Cisco website is not valid JSON
+  Adapted https://github.com/CiscoDevNet/DNAC-Platform for sending events to the Django webhook listener
+  """
   event = {
     "category": category[num],
     "status": "NEW",

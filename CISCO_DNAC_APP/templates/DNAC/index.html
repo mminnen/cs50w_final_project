@@ -1,4 +1,5 @@
 {%  extends "DNAC/base.html" %}
+{% load static %}
 
 {% block title %}
         <title>CS50w - Final Project</title>
@@ -21,6 +22,10 @@
             <button type="submit" class="btn btn-info">Simulate webhook events</button>
             </form>
            {%  endif %}
+      <br>
+
+      <h3>Concept and functionality:</h3>
+      <img src="{% static 'DNAC/img/DNAC_Concept.png' %}" class="img-fluid" alt="DNAC App Functionality">
       </div>
     </div>
   </div>

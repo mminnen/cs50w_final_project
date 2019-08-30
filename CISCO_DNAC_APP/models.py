@@ -25,7 +25,7 @@ class WebhookEvents(models.Model):
     category = models.CharField(max_length=50)                      # Category
     domain = models.CharField(max_length=50)                        # domain
     severity = models.CharField(max_length=50)                      # severity
-    timestamp = models.DateTimeField()                              # timestamp (integer)
+    timestamp = models.DateTimeField(name='Date')                   # timestamp (integer)
     actual_service_id = models.CharField(max_length=50)             # actualServiceId
     issue_description = models.CharField(max_length=100, blank=True, default='', verbose_name='Issue Description')
     # ["enrichmentInfo"]["issueDetails"]["issue"][0]["issueSummary"]

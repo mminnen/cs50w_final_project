@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from CISCO_DNAC_APP.models import *
 from CISCO_DNAC_APP.forms import *
+from CISCO_DNAC_APP.filters import WebhookEventsFilter
 from CISCO_DNAC_APP.simulate_webhook_events import simulate_event
 import time, threading, requests, json
 from requests.auth import HTTPBasicAuth
@@ -26,8 +27,12 @@ def health(request):
 
 
 def events(request):
-    # Make this one searchable
-    return render(request, "DNAC/events.html")
+    # How to filter querysets using django-filter
+    # https://simpleisbetterthancomplex.com/tutorial/2016/11/28/how-to-filter-querysets-dynamically.html
+    event_list = WebhookEvents.objects.all().order_by('-Date')  # '-' orders descending
+    print(request.GET)
+    event_filter = WebhookEventsFilter(request.GET, queryset=event_list)
+    return render(request, "DNAC/events.html", {'filter': event_filter})
 
 
 def manage_controllers(request):
@@ -96,6 +101,7 @@ def collect_statistics(request):
 def request_controller_stats():
     simulate_event()
     print(time.ctime())
+    # Keep sending simulated webhook events
     threading.Timer(10, request_controller_stats).start()  # Restart function every 10 second interval
     return
 
@@ -133,6 +139,7 @@ def get_site_count(controller):
 def get_intent_api(url, controller, params=None):
     """
     Generic fuction to GET information via the Intent API
+    https://developer.cisco.com/site/dna-center-rest-api/
     """
     print(params)
     print("\nExecuting GET '%s'\n" % url)
